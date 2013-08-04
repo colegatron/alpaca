@@ -50,12 +50,39 @@
         /**
          * @see Alpaca.Fields.TextField#postRender
          */
+            // TODO; Set a procedure to be able to :
+            // - set the file content in edit mode
+            // - edit the file content in some way. Probably it would be fine to show a template
+            //   which shows a input file control to upload a new image, show also the current image
+            //   in a 100x100 thunmail and a checkbox to mark it as deleted (to be able to delete without
+            //   uploading a new one).
+            // - Set a method to handle the checkbox input for deletion
         postRender: function() {
             this.base();
             // apply additional css
-			if (this.fieldContainer) {
-				this.fieldContainer.addClass("alpaca-controlfield-file");
+            if (this.fieldContainer) {
+                this.fieldContainer.addClass("alpaca-controlfield-file");
             }
+            var thelement = this;
+            // The file data is accesible once the onchange evt is fired
+            this.field[0].onchange = function(evt) {
+                var reader = new FileReader();
+                reader.onload=(function(evt2) {
+                    var dataUri = evt2.target.result;
+                    // If I set the value, it does nothing. Not sure how Api works and I've not more
+                    // spare time.
+                    //this.setValue(dataUri);
+                    // Overriding the getValue method you get the image data and can be stored on backend
+                    // You loose the filename, but usually an image named fieldname should be fine, because
+                    // in the backend you know which field refers to and which data type it is looking into
+                    // the dataUri
+                    thelement.getValue = function() { return dataUri; }
+
+                });
+                if ( this.files ) {
+                    reader.readAsDataURL(this.files[0]);
+                }
+            };
         },//__BUILDER_HELPERS
 		
 		/**
